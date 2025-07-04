@@ -36,7 +36,7 @@ export default function Home() {
         setError(data.error || 'Something went wrong')
       }
     } catch (err) {
-      setError('Something went wrong')
+      setError('Something went wrong'+err)
     }
 
     setLoading(false)
