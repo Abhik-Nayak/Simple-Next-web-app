@@ -63,6 +63,15 @@ export default function AccountDropdown({ onClose, anchorRef }) {
         >
           🛒 View Cart
         </button>
+         <button
+          onClick={() => {
+            onClose();
+            router.push("/my-orders");
+          }}
+          className="w-full text-left px-4 py-2 rounded hover:bg-gray-100"
+        >
+          🛍️ My Orders
+        </button>
         <button
           onClick={() => {
             onClose();

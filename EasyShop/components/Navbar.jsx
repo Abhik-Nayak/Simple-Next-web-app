@@ -43,24 +43,16 @@ const Navbar = () => {
         </div>
         <ul className="hidden md:flex items-center gap-4">
           <Image className="w-4 h-4" src={assets.search_icon} alt="search icon" />
-          {/* {user?<AccountButton/>:
-          <button onClick={() => setShowAuthModal(true)} className="flex items-center gap-2 hover:text-gray-900 transition">
-            <Image src={assets.user_icon} alt="user icon" />
-            Account
-          </button>} */}
           <AccountButton/>
         </ul>
-        {/* <div className="flex items-center md:hidden gap-3">
+        <div className="flex items-center md:hidden gap-3">
           {isSeller && (
             <button onClick={() => router.push("/seller")} className="text-xs border px-4 py-1.5 rounded-full">
               Seller Dashboard
             </button>
           )}
-          <button onClick={() => setShowAuthModal(true)} className="flex items-center gap-2 hover:text-gray-900 transition">
-            <Image src={assets.user_icon} alt="user icon" />
-            Account
-          </button>
-        </div> */}
+           <AccountButton/>
+        </div>
       </nav>
 
       {/* Auth Modal */}

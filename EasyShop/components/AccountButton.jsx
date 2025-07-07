@@ -1,13 +1,14 @@
 "use client";
 import { signIn, useSession } from "next-auth/react";
 import Image from "next/image";
-import { useState } from "react";
-import AccountModal from "@/components/AccountModal";
+import { useRef, useState } from "react";
 import { assets } from "@/assets/assets";
+import AccountDropdown from "./AccountDropdown";
 
 export default function AccountButton() {
   const { data: session, status } = useSession();
-  const [showModal, setShowModal] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const buttonRef = useRef();
 
   if (status === "loading") return <span>Loading...</span>;
 
@@ -24,9 +25,9 @@ export default function AccountButton() {
   }
 
   return (
-    <>
+    <div className="relative" ref={buttonRef}>
       <button
-        onClick={() => setShowModal(true)}
+        onClick={() => setShowDropdown((prev) => !prev)}
         className="flex items-center gap-2 hover:text-gray-900 transition"
       >
         <Image
@@ -36,10 +37,15 @@ export default function AccountButton() {
           height={32}
           className="rounded-full"
         />
-        {session.user.name?.split(" ")[0]}
+        {/* {session.user.name?.split(" ")[0]} */}
       </button>
 
-      {showModal && <AccountModal onClose={() => setShowModal(false)} />}
-    </>
+      {showDropdown && (
+        <AccountDropdown
+          onClose={() => setShowDropdown(false)}
+          anchorRef={buttonRef}
+        />
+      )}
+    </div>
   );
 }
