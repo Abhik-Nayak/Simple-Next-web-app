@@ -1,17 +1,20 @@
 "use client";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Image from "next/image";
+import { useState } from "react";
+import AccountModal from "@/components/AccountModal";
 import { assets } from "@/assets/assets";
 
 export default function AccountButton() {
   const { data: session, status } = useSession();
+  const [showModal, setShowModal] = useState(false);
 
   if (status === "loading") return <span>Loading...</span>;
 
   if (!session) {
     return (
       <button
-        onClick={() => signIn()}
+        onClick={() => signIn("google")}
         className="flex items-center gap-2 hover:text-gray-900 transition"
       >
         <Image src={assets.user_icon} alt="user" className="w-5 h-5" />
@@ -21,13 +24,11 @@ export default function AccountButton() {
   }
 
   return (
-    <div className="relative group">
-      <button className="flex items-center gap-2 hover:text-gray-900 transition">
-        {/* <Image
-          src={session.user.image || assets.user_icon}
-          alt="user"
-          className="w-6 h-6 rounded-full"
-        /> */}
+    <>
+      <button
+        onClick={() => setShowModal(true)}
+        className="flex items-center gap-2 hover:text-gray-900 transition"
+      >
         <Image
           src={session.user.image || assets.user_icon}
           alt="user"
@@ -37,14 +38,8 @@ export default function AccountButton() {
         />
         {session.user.name?.split(" ")[0]}
       </button>
-      <div className="absolute top-full mt-2 right-0 w-40 bg-white shadow-lg border rounded hidden group-hover:block z-10">
-        <button
-          onClick={() => signOut()}
-          className="w-full text-left px-4 py-2 hover:bg-gray-100"
-        >
-          Logout
-        </button>
-      </div>
-    </div>
+
+      {showModal && <AccountModal onClose={() => setShowModal(false)} />}
+    </>
   );
 }
