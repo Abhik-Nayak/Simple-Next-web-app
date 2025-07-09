@@ -6,66 +6,23 @@ import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import { useAppContext } from "@/context/AppContext";
 import { useSession } from "next-auth/react";
+import { useCart } from "../hooks/useCart";
 
 const Cart = () => {
   const { data: session, status } = useSession();
-  console.log("status", status);
-
-  // ✅ Always call hooks at the top
-  const [cartItems, setCartItems] = useState({});
-  const [loading, setLoading] = useState(true);
-
   const {
-    products,
-    router,
-    // cartItems,
-    addToCart,
+    cartItems,
+    isLoading,
+    isProcessing,
+    error,
+    removeFromCart,
     updateCartQuantity,
-    getCartCount,
-  } = useAppContext();
-
-  // This function is user for getting latest cart items
-  const fetchCart = async () => {
-    const res = await fetch("/api/cart");
-    const data = await res.json();
-
-    if (data.success) {
-      setCartItems(data.cartItems);
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    if (status === "authenticated") fetchCart();
-  }, [status]);
-
-  // this function is used for remove item from cart by selected productId
-  const removeCartItem = async (productId) => {
-    try {
-      const res = await fetch("/api/cart", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setCartItems((prev) => {
-          const updated = { ...prev };
-          delete updated[productId];
-          return updated;
-        });
-      } else {
-        // Optionally handle error feedback here
-        console.error("Failed to remove item:", data.message);
-      }
-    } catch (error) {
-      console.error("Error removing cart item:", error);
-    }
-  };
+  } = useCart();
+  const { router, getCartCount } = useAppContext();
 
   // ✅ Conditional rendering *after* all hooks
   if (status === "loading") return <p>Loading session...</p>;
-  if (loading) return <p>Loading cart...</p>;
+  if (isLoading) return <p>Loading cart...</p>;
   return (
     <>
       <Navbar />
@@ -114,7 +71,8 @@ const Cart = () => {
                           </div>
                           <button
                             className="md:hidden text-xs text-orange-600 mt-1"
-                            onClick={() => removeCartItem(product.productId)}
+                            onClick={() => removeFromCart(product.productId)}
+                            disabled={isProcessing}
                           >
                             Remove
                           </button>
@@ -123,7 +81,8 @@ const Cart = () => {
                           <p className="text-gray-800">{product.productName}</p>
                           <button
                             className="text-xs text-orange-600 mt-1"
-                            onClick={() => ""}
+                            onClick={() => removeFromCart(product.productId)}
+                            disabled={isProcessing}
                           >
                             Remove
                           </button>
@@ -134,7 +93,17 @@ const Cart = () => {
                       </td>
                       <td className="py-4 md:px-4 px-1">
                         <div className="flex items-center md:gap-2 gap-1">
-                          <button onClick={() => ""}>
+                          <button
+                            onClick={() =>
+                              updateCartQuantity(
+                                product.productId,
+                                Number(product.quantity - 1)
+                              )
+                            }
+                            className={`${
+                              product.quantity >= 2 ? "" : "invisible"
+                            }`}
+                          >
                             <Image
                               src={assets.decrease_arrow}
                               alt="decrease_arrow"
@@ -142,17 +111,28 @@ const Cart = () => {
                             />
                           </button>
                           <input
-                            onChange={(e) =>
-                              updateCartQuantity(
-                                product._id,
-                                Number(e.target.value)
-                              )
-                            }
+                            // onChange={(e) =>
+                            //   updateCartQuantity(
+                            //     product.productId,
+                            //     Number(e.target.value)
+                            //   )
+                            // }
+                            disabled
                             type="number"
                             value={product.quantity}
                             className="w-8 border text-center appearance-none"
                           ></input>
-                          <button onClick={() => ""}>
+                          <button
+                            onClick={() =>
+                              updateCartQuantity(
+                                product.productId,
+                                Number(product.quantity + 1)
+                              )
+                            }
+                            className={`${
+                              product.quantity <5 ? "" : "invisible"
+                            }`}
+                          >
                             <Image
                               src={assets.increase_arrow}
                               alt="increase_arrow"

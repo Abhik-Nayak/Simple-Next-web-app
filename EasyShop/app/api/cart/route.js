@@ -27,12 +27,11 @@ export async function POST(req) {
     const user = await User.findOne({ email: session.user.email });
     if (!user) return new Response("User not found", { status: 404 });
 
-    console.log(user);
     // Check if item exists in cart
     const existingItem = user.cartItems[productId];
 
-    const updatedQuantity = existingItem ? existingItem.quantity || 0 + 1 : 1;
-    console.log("update", existingItem, updatedQuantity);
+    const updatedQuantity = existingItem.quantity ? existingItem.quantity + 1 : 1;
+    console.log("update",  updatedQuantity);
 
     user.cartItems[productId] = {
       productId,
@@ -80,27 +79,34 @@ export async function GET(req) {
   }
 }
 
-// This api ise used for -Remove Item for Cart<User Based>
-export async function DELETE(req) {
+export async function PATCH(req) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) return new Response("Unauthorized", { status: 401 });
 
-    const { productId } = await req.json();
-    if (!productId) return new Response("Missing ProductId", { status: 400 });
+    const { productId, quantity } = await req.json();
+
+    if (!productId || typeof quantity !== "number") {
+      return new Response("Missing or invalid data", { status: 400 });
+    }
 
     await connectDB();
 
     const user = await User.findOne({ email: session.user.email });
     if (!user) return new Response("User not found", { status: 404 });
 
-    delete user.cartItems[productId];
+    if (!user.cartItems[productId]) {
+      return new Response("Item not in cart", { status: 404 });
+    }
+
+    user.cartItems[productId].quantity = quantity;
     user.markModified("cartItems");
+
     await user.save();
 
-    return Response.json({ success: true, message: "Item removed" });
+    return Response.json({ success: true, cartItems: user.cartItems });
   } catch (err) {
-    console.error("Delete error:", err);
+    console.error("PATCH error:", err);
     return new Response("Server error", { status: 500 });
   }
 }
