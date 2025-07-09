@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { assets } from "@/assets/assets";
 import OrderSummary from "@/components/OrderSummary";
 import Image from "next/image";
@@ -9,16 +9,40 @@ import { useSession } from "next-auth/react";
 
 const Cart = () => {
   const { data: session, status } = useSession();
-  if (status === "loading") return <p>Loading...</p>;
+  console.log("status",status)
+
+  // ✅ Always call hooks at the top
+  const [cartItems, setCartItems] = useState({});
+  const [loading, setLoading] = useState(true);
 
   const {
     products,
     router,
-    cartItems,
+    // cartItems,
     addToCart,
     updateCartQuantity,
     getCartCount,
   } = useAppContext();
+
+  useEffect(() => {
+    const fetchCart = async () => {
+      const res = await fetch("/api/cart");
+      const data = await res.json();
+
+      if (data.success) {
+        setCartItems(data.cartItems);
+      }
+      setLoading(false);
+    };
+
+    if (status === "authenticated")fetchCart();
+  }, [status]);
+
+  // ✅ Conditional rendering *after* all hooks
+  if (status === "loading") return <p>Loading session...</p>;
+  if (loading) return <p>Loading cart...</p>;
+
+  console.log("cartItems", cartItems)
 
   return (
     <>
@@ -52,21 +76,21 @@ const Cart = () => {
                 </tr>
               </thead>
               <tbody>
-                {Object.keys(cartItems).map((itemId) => {
-                  const product = products.find(
-                    (product) => product._id === itemId
-                  );
+                {Object.values(cartItems).map((product) => {
+                  // const product = products.find(
+                  //   (product) => product._id === itemId
+                  // );
 
-                  if (!product || cartItems[itemId] <= 0) return null;
+                  // if (!product || cartItems[itemId] <= 0) return null;
 
                   return (
-                    <tr key={itemId}>
+                    <tr key={product.productId}>
                       <td className="flex items-center gap-4 py-4 md:px-4 px-1">
                         <div>
                           <div className="rounded-lg overflow-hidden bg-gray-500/10 p-2">
                             <Image
-                              src={product.image[0]}
-                              alt={product.name}
+                              src={product.productImage}
+                              alt={product.productName}
                               className="w-16 h-auto object-cover mix-blend-multiply"
                               width={1280}
                               height={720}
@@ -74,33 +98,28 @@ const Cart = () => {
                           </div>
                           <button
                             className="md:hidden text-xs text-orange-600 mt-1"
-                            onClick={() => updateCartQuantity(product._id, 0)}
+                            onClick={() => ''}
                           >
                             Remove
                           </button>
                         </div>
                         <div className="text-sm hidden md:block">
-                          <p className="text-gray-800">{product.name}</p>
+                          <p className="text-gray-800">{product.productName}</p>
                           <button
                             className="text-xs text-orange-600 mt-1"
-                            onClick={() => updateCartQuantity(product._id, 0)}
+                            onClick={() => ''}
                           >
                             Remove
                           </button>
                         </div>
                       </td>
                       <td className="py-4 md:px-4 px-1 text-gray-600">
-                        ${product.offerPrice}
+                        ${product.productPrice}
                       </td>
                       <td className="py-4 md:px-4 px-1">
                         <div className="flex items-center md:gap-2 gap-1">
                           <button
-                            onClick={() =>
-                              updateCartQuantity(
-                                product._id,
-                                cartItems[itemId] - 1
-                              )
-                            }
+                            onClick={() =>''}
                           >
                             <Image
                               src={assets.decrease_arrow}
@@ -116,10 +135,10 @@ const Cart = () => {
                               )
                             }
                             type="number"
-                            value={cartItems[itemId]}
+                            value={product.quantity}
                             className="w-8 border text-center appearance-none"
                           ></input>
-                          <button onClick={() => addToCart(product._id)}>
+                          <button onClick={() => ''}>
                             <Image
                               src={assets.increase_arrow}
                               alt="increase_arrow"
@@ -129,7 +148,7 @@ const Cart = () => {
                         </div>
                       </td>
                       <td className="py-4 md:px-4 px-1 text-gray-600">
-                        ${(product.offerPrice * cartItems[itemId]).toFixed(2)}
+                        ${(product.productPrice * product.quantity).toFixed(2)}
                       </td>
                     </tr>
                   );

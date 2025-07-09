@@ -10,7 +10,7 @@ import AccountButton from "./AccountButton";
 
 const Navbar = () => {
   const { isSeller, router, user } = useAppContext();
-  console.log(user, "navbar");
+
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   return (
