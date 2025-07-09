@@ -9,7 +9,7 @@ import { useSession } from "next-auth/react";
 
 const Cart = () => {
   const { data: session, status } = useSession();
-  console.log("status",status)
+  console.log("status", status);
 
   // ✅ Always call hooks at the top
   const [cartItems, setCartItems] = useState({});
@@ -24,26 +24,48 @@ const Cart = () => {
     getCartCount,
   } = useAppContext();
 
+  // This function is user for getting latest cart items
+  const fetchCart = async () => {
+    const res = await fetch("/api/cart");
+    const data = await res.json();
+
+    if (data.success) {
+      setCartItems(data.cartItems);
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchCart = async () => {
-      const res = await fetch("/api/cart");
-      const data = await res.json();
-
-      if (data.success) {
-        setCartItems(data.cartItems);
-      }
-      setLoading(false);
-    };
-
-    if (status === "authenticated")fetchCart();
+    if (status === "authenticated") fetchCart();
   }, [status]);
+
+  // this function is used for remove item from cart by selected productId
+  const removeCartItem = async (productId) => {
+    try {
+      const res = await fetch("/api/cart", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setCartItems((prev) => {
+          const updated = { ...prev };
+          delete updated[productId];
+          return updated;
+        });
+      } else {
+        // Optionally handle error feedback here
+        console.error("Failed to remove item:", data.message);
+      }
+    } catch (error) {
+      console.error("Error removing cart item:", error);
+    }
+  };
 
   // ✅ Conditional rendering *after* all hooks
   if (status === "loading") return <p>Loading session...</p>;
   if (loading) return <p>Loading cart...</p>;
-
-  console.log("cartItems", cartItems)
-
   return (
     <>
       <Navbar />
@@ -77,12 +99,6 @@ const Cart = () => {
               </thead>
               <tbody>
                 {Object.values(cartItems).map((product) => {
-                  // const product = products.find(
-                  //   (product) => product._id === itemId
-                  // );
-
-                  // if (!product || cartItems[itemId] <= 0) return null;
-
                   return (
                     <tr key={product.productId}>
                       <td className="flex items-center gap-4 py-4 md:px-4 px-1">
@@ -98,7 +114,7 @@ const Cart = () => {
                           </div>
                           <button
                             className="md:hidden text-xs text-orange-600 mt-1"
-                            onClick={() => ''}
+                            onClick={() => removeCartItem(product.productId)}
                           >
                             Remove
                           </button>
@@ -107,7 +123,7 @@ const Cart = () => {
                           <p className="text-gray-800">{product.productName}</p>
                           <button
                             className="text-xs text-orange-600 mt-1"
-                            onClick={() => ''}
+                            onClick={() => ""}
                           >
                             Remove
                           </button>
@@ -118,9 +134,7 @@ const Cart = () => {
                       </td>
                       <td className="py-4 md:px-4 px-1">
                         <div className="flex items-center md:gap-2 gap-1">
-                          <button
-                            onClick={() =>''}
-                          >
+                          <button onClick={() => ""}>
                             <Image
                               src={assets.decrease_arrow}
                               alt="decrease_arrow"
@@ -138,7 +152,7 @@ const Cart = () => {
                             value={product.quantity}
                             className="w-8 border text-center appearance-none"
                           ></input>
-                          <button onClick={() => ''}>
+                          <button onClick={() => ""}>
                             <Image
                               src={assets.increase_arrow}
                               alt="increase_arrow"

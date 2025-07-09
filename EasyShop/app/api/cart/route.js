@@ -58,6 +58,7 @@ export async function POST(req) {
   }
 }
 
+// This api function is used for getting all cartitem related to user.
 export async function GET(req) {
   try {
     const session = await getServerSession(authOptions);
@@ -75,6 +76,31 @@ export async function GET(req) {
     });
   } catch (err) {
     console.error("🛒 Cart Fetch Error:", err);
+    return new Response("Server error", { status: 500 });
+  }
+}
+
+// This api ise used for -Remove Item for Cart<User Based>
+export async function DELETE(req) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) return new Response("Unauthorized", { status: 401 });
+
+    const { productId } = await req.json();
+    if (!productId) return new Response("Missing ProductId", { status: 400 });
+
+    await connectDB();
+
+    const user = await User.findOne({ email: session.user.email });
+    if (!user) return new Response("User not found", { status: 404 });
+
+    delete user.cartItems[productId];
+    user.markModified("cartItems");
+    await user.save();
+
+    return Response.json({ success: true, message: "Item removed" });
+  } catch (err) {
+    console.error("Delete error:", err);
     return new Response("Server error", { status: 500 });
   }
 }
