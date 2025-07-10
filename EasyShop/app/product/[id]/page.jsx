@@ -9,11 +9,14 @@ import { useParams } from "next/navigation";
 import Loading from "@/components/Loading";
 import { useAppContext } from "@/context/AppContext";
 import React from "react";
+import toast from "react-hot-toast";
+import { useCart } from "@/app/hooks/useCart";
 
 const Product = () => {
   const { id } = useParams();
+  const { isProcessing, error, addToCart } = useCart();
 
-  const { products, router, addToCart } = useAppContext();
+  const { products, router } = useAppContext();
 
   const [mainImage, setMainImage] = useState(null);
   const [productData, setProductData] = useState(null);
@@ -22,29 +25,10 @@ const Product = () => {
     const product = products.find((product) => product._id === id);
     setProductData(product);
   };
-  console.log("selectedProduct", productData);
 
   useEffect(() => {
     fetchProductData();
   }, [id, products.length]);
-
-  const handleAddToCart = async (productData) => {
-    addToCart(productData._id)
-    const res = await fetch("/api/cart", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(productData),
-    });
-
-    const data = await res.json();
-    if (data.success) {
-      alert("Added to cart!");
-    } else {
-      alert("Error adding to cart");
-    }
-  };
 
   return productData ? (
     <>
@@ -144,17 +128,19 @@ const Product = () => {
 
             <div className="flex items-center mt-10 gap-4">
               <button
-                onClick={() => handleAddToCart(productData)}
+                onClick={() => addToCart(productData)}
                 className="w-full py-3.5 bg-gray-100 text-gray-800/80 hover:bg-gray-200 transition"
+                disabled={isProcessing}
               >
                 Add to Cart
               </button>
               <button
                 onClick={() => {
-                  addToCart(productData._id);
+                  // addToCart(productData._id);
                   router.push("/cart");
                 }}
                 className="w-full py-3.5 bg-orange-500 text-white hover:bg-orange-600 transition"
+                disabled={isProcessing}
               >
                 Buy now
               </button>

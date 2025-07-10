@@ -1,6 +1,7 @@
 "use client";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 const SigninSignupForm = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -14,13 +15,20 @@ const SigninSignupForm = () => {
     e.preventDefault();
 
     if (isLogin) {
-      signIn("credentials", {
+      const res = await signIn("credentials", {
         email: form.email,
         password: form.password,
         redirect: false,
       });
+
+      if (res?.error) {
+        toast.error(res.error); // 👈 show error
+      } else {
+        toast.success("Login successful!");
+        // Optional: redirect manually
+        window.location.href = "/";
+      }
     } else {
-      // Sign up (call your API route to create user)
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         body: JSON.stringify(form),
@@ -28,11 +36,11 @@ const SigninSignupForm = () => {
       });
 
       if (res.ok) {
-        alert("Signup successful! You can now login.");
+        toast.success("Signup successful! You can now login.");
         setIsLogin(true);
       } else {
         const { error } = await res.json();
-        alert(error || "Signup failed");
+        toast.error(error || "Signup failed");
       }
     }
   };

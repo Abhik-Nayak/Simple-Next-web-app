@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { assets } from "@/assets/assets";
 import Link from "next/link";
 import { useAppContext } from "@/context/AppContext";
@@ -7,11 +7,22 @@ import Image from "next/image";
 import Modal from "@/components/Modal";
 import SigninSignupForm from "@/components/SigninSignupForm";
 import AccountButton from "./AccountButton";
+import { useSession } from "next-auth/react";
 
 const Navbar = () => {
-  const { isSeller, router, user } = useAppContext();
-
+  const { data: session, status } = useSession();
+  const [isSeller, setIsSeller] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+
+  console.log("session", session, "status", status);
+  const { router, user } = useAppContext();
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      setShowAuthModal(false);
+      session.user.role === "seller" ? setIsSeller(true) : setIsSeller(false);
+    }
+  }, [status]);
 
   return (
     <>
