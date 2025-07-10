@@ -7,12 +7,10 @@ import NewsLetter from "@/components/NewsLetter";
 import FeaturedProduct from "@/components/FeaturedProduct";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { SnackbarProvider } from "notistack";
 
 const Home = () => {
   return (
     <>
-      <SnackbarProvider>
         <Navbar />
         <div className="px-6 md:px-16 lg:px-32">
           <HeaderSlider />
@@ -22,7 +20,6 @@ const Home = () => {
           <NewsLetter />
         </div>
         <Footer />
-      </SnackbarProvider>
     </>
   );
 };
