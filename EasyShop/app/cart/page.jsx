@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import { useAppContext } from "@/context/AppContext";
 import { useSession } from "next-auth/react";
 import { useCart } from "../hooks/useCart";
+import Loading from "@/components/Loading";
 
 const Cart = () => {
   const { data: session, status } = useSession();
@@ -20,8 +21,37 @@ const Cart = () => {
   } = useCart();
   const { router, getCartCount } = useAppContext();
 
+  /**
+   * Calculates the total sum and quantity of items in the cart using React.useMemo.
+   * 
+   * React.useMemo is a React Hook that memoizes the result of a computation,
+   * only recalculating the value when its dependencies change. In this case,
+   * the computation (reducing cartItems to sum and quantity) will only run
+   * when the cartItems object changes, improving performance by avoiding
+   * unnecessary recalculations on every render.
+   *
+   * @constant
+   * @type {{ sum: number, quantity: number }}
+   * @property {number} sum - The total price of all items in the cart.
+   * @property {number} quantity - The total quantity of all items in the cart.
+   */
+  const { sum, quantity } = React.useMemo(() => {
+    const result = Object.values(cartItems).reduce(
+      (acc, { quantity, productPrice }) => {
+        acc.sum += quantity * productPrice;
+        acc.quantity += quantity;
+        return acc;
+      },
+      { sum: 0, quantity: 0 }
+    );
+    return {
+      sum: Number(result.sum.toFixed(2)),
+      quantity: result.quantity,
+    };
+  }, [cartItems]);
+
   // ✅ Conditional rendering *after* all hooks
-  if (status === "loading") return <p>Loading session...</p>;
+  if (status === "loading") return <Loading/>;
   if (isLoading) return <p>Loading cart...</p>;
   return (
     <>
@@ -33,7 +63,7 @@ const Cart = () => {
               Your <span className="font-medium text-orange-600">Cart</span>
             </p>
             <p className="text-lg md:text-xl text-gray-500/80">
-              {getCartCount()} Items
+              {quantity} Items
             </p>
           </div>
           <div className="overflow-x-auto">
@@ -103,6 +133,7 @@ const Cart = () => {
                             className={`${
                               product.quantity >= 2 ? "" : "invisible"
                             }`}
+                            disabled={isProcessing}
                           >
                             <Image
                               src={assets.decrease_arrow}
@@ -130,8 +161,9 @@ const Cart = () => {
                               )
                             }
                             className={`${
-                              product.quantity <5 ? "" : "invisible"
+                              product.quantity < 5 ? "" : "invisible"
                             }`}
+                            disabled={isProcessing}
                           >
                             <Image
                               src={assets.increase_arrow}
@@ -162,7 +194,7 @@ const Cart = () => {
             Continue Shopping
           </button>
         </div>
-        <OrderSummary />
+        <OrderSummary totalItemsInCart={quantity} totalValue={sum} />
       </div>
     </>
   );
