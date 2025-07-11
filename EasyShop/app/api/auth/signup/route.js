@@ -18,6 +18,7 @@ export async function POST(req) {
       name,
       email,
       password: hashedPassword,
+      role: 'seller'
     });
 
     return new Response("User registered", { status: 201 });

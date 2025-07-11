@@ -2,6 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 
 export function useCart() {
   const { status } = useSession();
@@ -10,7 +11,7 @@ export function useCart() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState(null);
 
-  // ✅ Fetch cart on mount
+  // ✅ Fetch cart on mount //GET
   useEffect(() => {
     const fetchCart = async () => {
       try {
@@ -31,7 +32,7 @@ export function useCart() {
     if (status === "authenticated") fetchCart();
   }, [status]);
 
-  // ✅ Remove item
+  // ✅ Remove item // DELETE
   const removeFromCart = async (productId) => {
     setIsProcessing(true);
     try {
@@ -57,7 +58,7 @@ export function useCart() {
     }
   };
 
-  // ✅ Update quantity
+  // ✅ Update quantity //UPDATE
   const updateCartQuantity = async (productId, quantity) => {
     setIsProcessing(true);
     try {
@@ -79,12 +80,44 @@ export function useCart() {
     }
   };
 
+  // ✅Add to cart //POST
+  const addToCart = async (productData) => {
+    setIsProcessing(true);
+    try {
+      const res = await fetch("/api/cart", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(productData),
+      });
+
+      if (!res.ok) {
+        const errorMessage = await res.text(); // since your server returns plain text
+        toast.error(errorMessage || "Failed to add item to cart");
+        setIsProcessing(false)
+        return;
+      }
+
+      const data = await res.json();
+
+      if (data.success) {
+        toast.success("Added to cart!");
+      } else {
+        toast.error(data.message || "Error adding to cart");
+      }
+    } catch (error) {
+      console.error("Add to cart error:", error);
+      toast.error("Something went wrong. Please try again.");
+    }
+    setIsProcessing(false)
+  };
   return {
     cartItems,
     isLoading,
     isProcessing,
     error,
-    // addToCart,
+    addToCart,
     removeFromCart,
     updateCartQuantity,
     // checkout,

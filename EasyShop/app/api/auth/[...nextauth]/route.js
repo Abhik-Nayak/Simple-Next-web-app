@@ -5,7 +5,6 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 
-
 const authOptions = NextAuth({
   // Configure one or more authentication providers
   providers: [
@@ -61,9 +60,10 @@ const authOptions = NextAuth({
           // Update user if info changed
           if (
             existingUser.name !== user.name ||
-            existingUser.imageUrl !== user.imageUrl
+            existingUser.imageUrl !== user.image
           ) {
             existingUser.name = user.name;
+            existingUser.role = 'seller';
             if (user.image) existingUser.imageUrl = user.image;
             await existingUser.save();
             console.log("🔄 User updated");
@@ -76,7 +76,29 @@ const authOptions = NextAuth({
         return false;
       }
     },
+    // 🔑 Add this for JWT 
+    async jwt({ token, user }) {
+      if (user) {
+        // On initial sign in
+        await connectDB();
+        const dbUser = await User.findOne({ email: token.email });
+        token.role = dbUser?.role || "buyer";
+        token._id = dbUser?._id.toString();
+      }
+      return token;
+    },
+
+    // 🧠 session => exposed to client via useSession
+    async session({ session, token}) {
+      if(!session.user.image){
+         const dbUser = await User.findOne({ email: token.email });
+         session.user.image = dbUser.imageUrl;
+      }
+      session.user.role = token.role;
+      session.user._id = token._id;
+      return session;
+    },
   },
 });
 
-export { authOptions as GET, authOptions as POST,authOptions };
+export { authOptions as GET, authOptions as POST, authOptions };

@@ -30,7 +30,15 @@ export async function POST(req) {
     // Check if item exists in cart
     const existingItem = user.cartItems[productId];
 
-    const updatedQuantity = existingItem?.quantity ? existingItem?.quantity + 1 : 1;
+    if (existingItem.quantity === 5) {
+      return new Response("You can add a maximum of 5 units for any product.", {
+        status: 400,
+      });
+    }
+
+    const updatedQuantity = existingItem?.quantity
+      ? existingItem?.quantity + 1
+      : 1;
 
     user.cartItems[productId] = {
       productId,
