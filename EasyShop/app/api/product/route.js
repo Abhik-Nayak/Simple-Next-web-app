@@ -35,7 +35,7 @@ export async function POST(req) {
       );
       uploadedImages.push(uploadRes.secure_url);
     }
-    console.log("sessionUserId", session, session.user._id);
+    // console.log("sessionUserId", session, session.user._id);
     const newProduct = await Product.create({
       name,
       description,
@@ -64,7 +64,7 @@ export async function GET(req) {
     // Get seller's MongoDB ID using their email from session
     const seller = await User.findOne({ email: session.user.email });
     if (!seller) return new Response("Seller not found", { status: 404 });
-    console.log("seller", seller);
+    // console.log("seller", seller);
 
     const products = await Product.find({ sellerId: seller._id });
 

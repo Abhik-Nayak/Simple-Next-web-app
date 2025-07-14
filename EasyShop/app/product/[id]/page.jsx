@@ -25,10 +25,22 @@ const Product = () => {
     const product = products.find((product) => product._id === id);
     setProductData(product);
   };
+  const getProductDetails = async (id) => {
+    try{
+    const res = await fetch(`/api/product/${id}`);
+    const data = await res.json();
+    console.log(data);
+    }catch(err){
+      console.log(err)
+    }
+  };
 
   useEffect(() => {
-    fetchProductData();
-  }, [id, products.length]);
+
+    getProductDetails(id);
+  }, [id]);
+
+
 
   return productData ? (
     <>

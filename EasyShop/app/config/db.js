@@ -5,7 +5,7 @@ let isConnected = false; // Global connection state
 
 const connectDB = async () => {
   if (isConnected) {
-    console.log("✅ Already connected to MongoDB");
+    // console.log("✅ Already connected to MongoDB");
     return;
   }
 
@@ -17,7 +17,7 @@ const connectDB = async () => {
     const db = await mongoose.connect(process.env.MONGODB_URI);
 
     isConnected = db.connections[0].readyState;
-    console.log("✅ Connected to MongoDB");
+    // console.log("✅ Connected to MongoDB");
   } catch (error) {
     console.error("❌ MongoDB connection error:", error);
     throw error;

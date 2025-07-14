@@ -55,7 +55,7 @@ const authOptions = NextAuth({
             email: user.email,
             imageUrl: user.image,
           });
-          console.log("✅ New user saved");
+          // console.log("✅ New user saved");
         } else {
           // Update user if info changed
           if (
@@ -66,7 +66,7 @@ const authOptions = NextAuth({
             existingUser.role = 'seller';
             if (user.image) existingUser.imageUrl = user.image;
             await existingUser.save();
-            console.log("🔄 User updated");
+            // console.log("🔄 User updated");
           }
         }
 
