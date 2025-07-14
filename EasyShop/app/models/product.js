@@ -1,3 +1,4 @@
+// models/product.js
 import mongoose from "mongoose";
 
 const productSchema = new mongoose.Schema({
@@ -6,10 +7,10 @@ const productSchema = new mongoose.Schema({
   category: String,
   price: Number,
   offerPrice: Number,
-  imageUrls: [String], // multiple images
-  sellerId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  quantity: Number,
+  imageUrls: [String],
+  sellerId: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // ✅ Important!
 });
 
-const Product =
-  mongoose.models.Product || mongoose.model("Product", productSchema);
+const Product = mongoose.models.Product || mongoose.model("Product", productSchema);
 export default Product;

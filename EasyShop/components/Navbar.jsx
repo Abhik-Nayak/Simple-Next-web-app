@@ -14,7 +14,6 @@ const Navbar = () => {
   const [isSeller, setIsSeller] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
 
-  console.log("session", session, "status", status);
   const { router, user } = useAppContext();
 
   useEffect(() => {

@@ -1,47 +1,96 @@
-'use client'
+"use client";
 import React, { useState } from "react";
 import { assets } from "@/assets/assets";
 import Image from "next/image";
+import toast from "react-hot-toast";
+import { useSession } from "next-auth/react";
 
 const AddProduct = () => {
-
+  const { data: session } = useSession();
   const [files, setFiles] = useState([]);
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('Earphone');
-  const [price, setPrice] = useState('');
-  const [offerPrice, setOfferPrice] = useState('');
+  const [name, setName] = useState("");
+  const [quantity, setQuantity] = useState(0);
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("Earphone");
+  const [price, setPrice] = useState("");
+  const [offerPrice, setOfferPrice] = useState("");
 
+  // Add this inside handleSubmit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-  };
+    const data = new FormData();
+    data.append("name", name);
+    data.append("quantity", quantity);
+    data.append("description", description);
+    data.append("category", category);
+    data.append("price", price);
+    data.append("offerPrice", offerPrice);
+    data.append("sellerId", session.user._id);
 
+    // Append all images to FormData
+    files.forEach((file) => {
+      data.append("images", file);
+    });
+
+    try {
+      const res = await fetch("/api/product", {
+        method: "POST",
+        body: data,
+      });
+
+      const result = await res.json();
+
+      if (res.ok) {
+        toast.success("Product uploaded!");
+        // Clear form after success
+        // setName("");
+        // setDescription("");
+        // setCategory("Earphone");
+        // setPrice("");
+        // setQuantity(0);
+        // setOfferPrice("");
+        // setFiles([]);
+      } else {
+        toast.error(result.message || "Something went wrong");
+      }
+    } catch (err) {
+      console.error("Upload error:", err);
+      toast.error("Upload failed. Please try again.");
+    }
+  };
   return (
     <div className="flex-1 min-h-screen flex flex-col justify-between">
       <form onSubmit={handleSubmit} className="md:p-10 p-4 space-y-5 max-w-lg">
         <div>
           <p className="text-base font-medium">Product Image</p>
           <div className="flex flex-wrap items-center gap-3 mt-2">
-
             {[...Array(4)].map((_, index) => (
               <label key={index} htmlFor={`image${index}`}>
-                <input onChange={(e) => {
-                  const updatedFiles = [...files];
-                  updatedFiles[index] = e.target.files[0];
-                  setFiles(updatedFiles);
-                }} type="file" id={`image${index}`} hidden />
+                <input
+                  onChange={(e) => {
+                    const updatedFiles = [...files];
+                    updatedFiles[index] = e.target.files[0];
+                    setFiles(updatedFiles);
+                  }}
+                  type="file"
+                  id={`image${index}`}
+                  hidden
+                />
                 <Image
                   key={index}
                   className="max-w-24 cursor-pointer"
-                  src={files[index] ? URL.createObjectURL(files[index]) : assets.upload_area}
+                  src={
+                    files[index]
+                      ? URL.createObjectURL(files[index])
+                      : assets.upload_area
+                  }
                   alt=""
                   width={100}
                   height={100}
                 />
               </label>
             ))}
-
           </div>
         </div>
         <div className="flex flex-col gap-1 max-w-md">
@@ -55,6 +104,20 @@ const AddProduct = () => {
             className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
             onChange={(e) => setName(e.target.value)}
             value={name}
+            required
+          />
+        </div>
+        <div className="flex flex-col gap-1 max-w-md">
+          <label className="text-base font-medium" htmlFor="product-name">
+            Product Quantity
+          </label>
+          <input
+            id="product-name"
+            type="number"
+            placeholder="Type here"
+            className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
+            onChange={(e) => setQuantity(e.target.value)}
+            value={quantity}
             required
           />
         </div>
@@ -124,7 +187,10 @@ const AddProduct = () => {
             />
           </div>
         </div>
-        <button type="submit" className="px-8 py-2.5 bg-orange-600 text-white font-medium rounded">
+        <button
+          type="submit"
+          className="px-8 py-2.5 bg-orange-600 text-white font-medium rounded"
+        >
           ADD
         </button>
       </form>
