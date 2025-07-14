@@ -1,26 +1,32 @@
 "use client";
-import Footer from "@/components/Footer";
-import Loading from "@/components/Loading";
 import React, { useEffect, useState } from "react";
-import { assets } from "@/assets/assets";
+import { assets, productsDummyData } from "@/assets/assets";
 import Image from "next/image";
 import { useAppContext } from "@/context/AppContext";
+import Footer from "@/components/seller/Footer";
+import Loading from "@/components/Loading";
 
 const ProductList = () => {
   const { router } = useAppContext();
-  const [loading, setLoading] = useState(true);
+
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchSellerProduct = async () => {
+    setProducts(productsDummyData);
+    setLoading(false);
+  };
+
   useEffect(() => {
     // fetchSellerProduct();
     const getAll = async () => {
       const res = await fetch("/api/product");
       const data = await res.json();
-      //   console.log(data.products);
-      setProducts(data.products);
-      setLoading(false);
+      // console.log(data.products);
     };
     getAll();
-  }, []);
+  },[]);
+
   return (
     <div className="flex-1 min-h-screen flex flex-col justify-between">
       {loading ? (
@@ -50,7 +56,7 @@ const ProductList = () => {
                     <td className="md:px-4 pl-2 md:pl-4 py-3 flex items-center space-x-3 truncate">
                       <div className="bg-gray-500/10 rounded p-2">
                         <Image
-                          src={product.imageUrls[0]}
+                          src={product.image[0]}
                           alt="product Image"
                           className="w-16"
                           width={1280}
