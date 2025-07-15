@@ -1,4 +1,10 @@
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from 'jsonwebtoken';
+
+interface UserJwtPayload extends JwtPayload {
+  id: string;
+  email: string;
+  role: 'SELLER' | 'BUYER'; // adjust as needed
+}
 
 /**
  * JWT secret key from environment variables
@@ -20,9 +26,15 @@ export function signJwtToken(payload: object) {
  * @param token - The JWT token to verify
  * @returns Decoded token payload if valid, null if invalid or expired
  */
-export function verifyJwtToken(token: string) {
+export function verifyJwtToken(token: string): UserJwtPayload | null {
   try {
-    return jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    if (typeof decoded === 'object' && 'id' in decoded && 'role' in decoded) {
+      return decoded as UserJwtPayload;
+    }
+
+    return null;
   } catch (err) {
     return null;
   }
