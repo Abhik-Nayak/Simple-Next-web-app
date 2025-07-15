@@ -4,8 +4,7 @@ import connectDB from "@/app/config/db";
 import Product from "@/app/models/product";
 import { NextResponse } from "next/server";
 
-export async function GET(req, contextPromise) {
-  const context = await contextPromise; // ✅ await the context
+export async function GET(req, context) {
   const { id } = context.params;
 
   try {

@@ -36,7 +36,6 @@ const Product = () => {
   };
 
   useEffect(() => {
-
     getProductDetails(id);
   }, [id]);
 
