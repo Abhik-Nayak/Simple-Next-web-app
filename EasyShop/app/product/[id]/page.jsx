@@ -29,6 +29,7 @@ const Product = () => {
     try{
     const res = await fetch(`/api/product/${id}`);
     const data = await res.json();
+    setProductData(data);
     console.log(data);
     }catch(err){
       console.log(err)
@@ -49,7 +50,7 @@ const Product = () => {
           <div className="px-5 lg:px-16 xl:px-20">
             <div className="rounded-lg overflow-hidden bg-gray-500/10 mb-4">
               <Image
-                src={mainImage || productData.image[0]}
+                src={productData?.imageUrls[0]}
                 alt="alt"
                 className="w-full h-auto object-cover mix-blend-multiply"
                 width={1280}
@@ -58,7 +59,7 @@ const Product = () => {
             </div>
 
             <div className="grid grid-cols-4 gap-4">
-              {productData.image.map((image, index) => (
+              {productData.imageUrls.map((image, index) => (
                 <div
                   key={index}
                   onClick={() => setMainImage(image)}
